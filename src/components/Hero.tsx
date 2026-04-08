@@ -1,13 +1,11 @@
 import { motion } from "framer-motion";
+import heroBg from "@/assets/hero-bg.jpg";
 
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-primary text-primary-foreground py-20 md:py-28">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: "radial-gradient(circle at 20% 50%, hsl(35 80% 55% / 0.3), transparent 50%), radial-gradient(circle at 80% 50%, hsl(35 80% 55% / 0.15), transparent 50%)"
-        }} />
-      </div>
+      <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" width={1920} height={800} />
+      <div className="absolute inset-0 bg-primary/70" />
 
       <div className="container mx-auto px-4 relative z-10 text-center">
         <motion.p
