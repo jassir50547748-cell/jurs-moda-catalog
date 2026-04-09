@@ -32,7 +32,7 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto mb-8"
         >
-          Shorts, polos, chompas y más. Pedidos por docena, media docena y cuarta.
+          Busos, shorts, poleras, chompas y más. Pedidos desde cuarta (3 uds), media docena y docena.
         </motion.p>
 
         <motion.a

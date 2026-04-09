@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Plus, LogOut, Eye, EyeOff } from "lucide-react";
+import { Trash2, Plus, LogOut, Eye, EyeOff, Package, Palette } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Database } from "@/integrations/supabase/types";
+import AdminProductForm from "@/components/admin/AdminProductForm";
+import AdminVariantsPanel from "@/components/admin/AdminVariantsPanel";
 
 type ProductCategory = Database["public"]["Enums"]["product_category"];
 
@@ -15,6 +17,7 @@ interface Product {
   image_url: string | null;
   price: number | null;
   active: boolean;
+  sold_out: boolean;
 }
 
 export default function Admin() {
@@ -24,13 +27,7 @@ export default function Admin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-
-  // Form state
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState<ProductCategory>("otros");
-  const [price, setPrice] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [variantsProductId, setVariantsProductId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -51,47 +48,13 @@ export default function Admin() {
     setLoading(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-
-    let imageUrl: string | null = null;
-
-    if (imageFile) {
-      const ext = imageFile.name.split(".").pop();
-      const path = `${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(path, imageFile);
-
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(path);
-        imageUrl = urlData.publicUrl;
-      }
-    }
-
-    const { error } = await supabase.from("products").insert({
-      name,
-      category,
-      price: price ? parseFloat(price) : null,
-      image_url: imageUrl,
-    });
-
-    if (!error) {
-      setName("");
-      setCategory("otros");
-      setPrice("");
-      setImageFile(null);
-      setShowForm(false);
-      fetchProducts();
-    }
-    setSaving(false);
-  };
-
   const toggleActive = async (id: string, active: boolean) => {
     await supabase.from("products").update({ active: !active }).eq("id", id);
+    fetchProducts();
+  };
+
+  const toggleSoldOut = async (id: string, sold_out: boolean) => {
+    await supabase.from("products").update({ sold_out: !sold_out }).eq("id", id);
     fetchProducts();
   };
 
@@ -107,7 +70,6 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="font-heading text-xl font-bold text-foreground">Panel Admin</h1>
@@ -132,82 +94,26 @@ export default function Admin() {
           </button>
         </div>
 
-        {/* Add Form */}
         <AnimatePresence>
           {showForm && (
-            <motion.form
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              onSubmit={handleSubmit}
-              className="bg-card border border-border rounded-xl p-6 mb-8 overflow-hidden"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Nombre del modelo *</label>
-                  <input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-secondary text-foreground rounded-lg px-4 py-2.5 border border-border outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Categoría *</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                    className="w-full bg-secondary text-foreground rounded-lg px-4 py-2.5 border border-border outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="shorts">Shorts</option>
-                    <option value="polos">Polos</option>
-                    <option value="chompas">Chompas</option>
-                    <option value="otros">Otros</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Precio (opcional)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="Dejar vacío para ocultar"
-                    className="w-full bg-secondary text-foreground rounded-lg px-4 py-2.5 border border-border outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Foto del modelo *</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    required
-                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                    className="w-full bg-secondary text-foreground rounded-lg px-4 py-2 border border-border text-sm file:mr-3 file:rounded-md file:border-0 file:bg-accent file:text-accent-foreground file:px-3 file:py-1 file:text-sm file:font-medium"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 mt-4">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
-                >
-                  {saving ? "Guardando..." : "Guardar Modelo"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="px-4 py-2.5 rounded-lg text-sm border border-border text-muted-foreground hover:bg-secondary transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </motion.form>
+            <AdminProductForm
+              onClose={() => setShowForm(false)}
+              onSaved={fetchProducts}
+            />
           )}
         </AnimatePresence>
 
-        {/* Products Table */}
+        {/* Variants Panel */}
+        <AnimatePresence>
+          {variantsProductId && (
+            <AdminVariantsPanel
+              productId={variantsProductId}
+              productName={products.find((p) => p.id === variantsProductId)?.name || ""}
+              onClose={() => setVariantsProductId(null)}
+            />
+          )}
+        </AnimatePresence>
+
         {loading ? (
           <p className="text-muted-foreground">Cargando...</p>
         ) : (
@@ -240,12 +146,33 @@ export default function Admin() {
                         {p.price !== null ? `S/ ${p.price.toFixed(2)}` : "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"}`}>
-                          {p.active ? "Activo" : "Oculto"}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full w-fit ${p.active ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"}`}>
+                            {p.active ? "Activo" : "Oculto"}
+                          </span>
+                          {p.sold_out && (
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full w-fit bg-red-100 text-red-700">
+                              Agotado
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => setVariantsProductId(p.id)}
+                            className="p-1.5 rounded-md hover:bg-secondary transition-colors text-accent hover:text-accent"
+                            title="Gestionar colores"
+                          >
+                            <Palette className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => toggleSoldOut(p.id, p.sold_out)}
+                            className={`p-1.5 rounded-md hover:bg-secondary transition-colors ${p.sold_out ? "text-destructive" : "text-muted-foreground hover:text-foreground"}`}
+                            title={p.sold_out ? "Marcar disponible" : "Marcar agotado"}
+                          >
+                            <Package className="h-4 w-4" />
+                          </button>
                           <button
                             onClick={() => toggleActive(p.id, p.active)}
                             className="p-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"

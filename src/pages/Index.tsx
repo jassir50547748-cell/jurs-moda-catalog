@@ -13,6 +13,7 @@ interface Product {
   category: string;
   image_url: string | null;
   price: number | null;
+  sold_out: boolean;
 }
 
 export default function Index() {
@@ -25,7 +26,7 @@ export default function Index() {
     const fetchProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, category, image_url, price")
+        .select("id, name, category, image_url, price, sold_out")
         .eq("active", true)
         .order("created_at", { ascending: false });
       setProducts((data as Product[]) || []);
