@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      product_variants: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          in_stock: boolean
+          product_id: string
+          size: string | null
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          in_stock?: boolean
+          product_id: string
+          size?: string | null
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          in_stock?: boolean
+          product_id?: string
+          size?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean
@@ -23,6 +58,7 @@ export type Database = {
           image_url: string | null
           name: string
           price: number | null
+          sold_out: boolean
           updated_at: string
         }
         Insert: {
@@ -33,6 +69,7 @@ export type Database = {
           image_url?: string | null
           name: string
           price?: number | null
+          sold_out?: boolean
           updated_at?: string
         }
         Update: {
@@ -43,6 +80,7 @@ export type Database = {
           image_url?: string | null
           name?: string
           price?: number | null
+          sold_out?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -80,7 +118,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      product_category: "shorts" | "polos" | "chompas" | "otros"
+      product_category:
+        | "shorts"
+        | "polos"
+        | "chompas"
+        | "otros"
+        | "busos"
+        | "poleras"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -209,7 +253,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      product_category: ["shorts", "polos", "chompas", "otros"],
+      product_category: [
+        "shorts",
+        "polos",
+        "chompas",
+        "otros",
+        "busos",
+        "poleras",
+      ],
     },
   },
 } as const
