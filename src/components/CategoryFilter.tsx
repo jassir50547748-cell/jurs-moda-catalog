@@ -2,9 +2,11 @@ import { motion } from "framer-motion";
 
 const categories = [
   { value: "all", label: "Todos" },
+  { value: "busos", label: "Busos" },
   { value: "shorts", label: "Shorts" },
-  { value: "polos", label: "Polos" },
+  { value: "poleras", label: "Poleras" },
   { value: "chompas", label: "Chompas" },
+  { value: "polos", label: "Polos" },
   { value: "otros", label: "Otros" },
 ];
 

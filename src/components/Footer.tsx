@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 text-center">
         <h2 className="font-heading text-xl font-bold mb-2">JURS MODA</h2>
         <p className="text-primary-foreground/60 text-sm mb-6">
-          Venta al por mayor — Shorts, Polos, Chompas y más
+          Venta al por mayor — Busos, Shorts, Poleras, Chompas y más
         </p>
         <p className="text-primary-foreground/40 text-xs">
           © {new Date().getFullYear()} JURS MODA. Todos los derechos reservados.
