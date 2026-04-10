@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, X, MessageCircle } from "lucide-react";
+import { X, MessageCircle } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 
 export default function StickyCart() {
-  const { items, totalItems, removeItem, generateWhatsAppUrl, clearCart } = useCart();
+  const { items, totalItems, totalPrice, removeItem, generateWhatsAppUrl, clearCart } = useCart();
 
   if (items.length === 0) return null;
 
@@ -17,10 +17,9 @@ export default function StickyCart() {
         className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border shadow-2xl"
       >
         <div className="container mx-auto px-4 py-3">
-          {/* Thumbnails row */}
           <div className="flex items-center gap-3 mb-3 overflow-x-auto pb-1">
-            {items.map((item) => (
-              <div key={item.productId} className="relative flex-shrink-0">
+            {items.map((item, idx) => (
+              <div key={`${item.productId}-${item.color}-${idx}`} className="relative flex-shrink-0">
                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-accent bg-secondary">
                   {item.imageUrl ? (
                     <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
@@ -31,19 +30,19 @@ export default function StickyCart() {
                   )}
                 </div>
                 <button
-                  onClick={() => removeItem(item.productId)}
+                  onClick={() => removeItem(item.productId, item.color)}
                   className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </div>
             ))}
-            <span className="text-sm text-muted-foreground whitespace-nowrap ml-2">
-              {totalItems} unidades
-            </span>
+            <div className="text-sm text-muted-foreground whitespace-nowrap ml-2">
+              <span>{totalItems} uds</span>
+              {totalPrice > 0 && <span className="ml-2 font-medium text-foreground">S/ {totalPrice.toFixed(2)}</span>}
+            </div>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
             <button
               onClick={clearCart}

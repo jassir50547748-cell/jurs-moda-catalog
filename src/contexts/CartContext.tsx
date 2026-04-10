@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
-export type QuantityType = "docena" | "media_docena" | "cuarta";
+export type QuantityType = "docena" | "media_docena";
 
 export interface CartItem {
   productId: string;
@@ -10,6 +10,7 @@ export interface CartItem {
   quantity: number;
   color?: string;
   size?: string;
+  unitPrice?: number;
 }
 
 interface CartContextType {
@@ -19,23 +20,21 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number, color?: string) => void;
   clearCart: () => void;
   totalItems: number;
+  totalPrice: number;
   generateWhatsAppUrl: () => string;
 }
 
-const WHATSAPP_NUMBER = "51999999999";
+const WHATSAPP_NUMBER = "59175544239";
 
 const quantityLabels: Record<QuantityType, { label: string; units: number }> = {
   docena: { label: "Docena", units: 12 },
   media_docena: { label: "Media Docena", units: 6 },
-  cuarta: { label: "Cuarta", units: 3 },
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-
-  const itemKey = (productId: string, color?: string) => `${productId}__${color || ""}`;
 
   const addItem = useCallback((item: Omit<CartItem, "quantity"> & { quantity?: number }) => {
     setItems((prev) => {
@@ -74,22 +73,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return sum + item.quantity * units;
   }, 0);
 
+  const totalPrice = items.reduce((sum, item) => {
+    if (!item.unitPrice) return sum;
+    return sum + item.unitPrice * item.quantity;
+  }, 0);
+
   const generateWhatsAppUrl = useCallback(() => {
     const lines = items.map((item) => {
       const label = quantityLabels[item.quantityType].label;
       const units = quantityLabels[item.quantityType].units * item.quantity;
       const colorInfo = item.color ? ` | Color: ${item.color}` : "";
       const sizeInfo = item.size ? ` | Talla: ${item.size}` : "";
-      return `• ${item.quantity}x ${label} de "${item.name}"${colorInfo}${sizeInfo} (${units} uds)`;
+      const priceInfo = item.unitPrice ? ` | S/ ${(item.unitPrice * item.quantity).toFixed(2)}` : "";
+      return `• ${item.quantity}x ${label} de "${item.name}"${colorInfo}${sizeInfo} (${units} uds)${priceInfo}`;
     });
 
-    const message = `Hola Jurs Moda, deseo adquirir los siguientes modelos por mayor:\n\n${lines.join("\n")}\n\nTotal: ${totalItems} unidades\n\nQuedo atento(a) a su confirmación. ¡Gracias!`;
+    const priceSection = totalPrice > 0 ? `\n\nMonto Total Estimado: S/ ${totalPrice.toFixed(2)}` : "";
+    const message = `Hola Jurs Moda, deseo adquirir los siguientes modelos por mayor (Docenas/Medias):\n\n${lines.join("\n")}\n\nTotal: ${totalItems} unidades${priceSection}\n\nQuedo atento(a) a su confirmación. ¡Gracias!`;
     const encoded = encodeURIComponent(message);
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
-  }, [items, totalItems]);
+  }, [items, totalItems, totalPrice]);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, generateWhatsAppUrl }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice, generateWhatsAppUrl }}>
       {children}
     </CartContext.Provider>
   );

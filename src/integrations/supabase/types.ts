@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      product_images: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          image_url: string
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_variants: {
         Row: {
           color: string
@@ -58,6 +93,9 @@ export type Database = {
           image_url: string | null
           name: string
           price: number | null
+          price_docena: number | null
+          price_mayoreo: number | null
+          price_media_docena: number | null
           sold_out: boolean
           updated_at: string
         }
@@ -69,6 +107,9 @@ export type Database = {
           image_url?: string | null
           name: string
           price?: number | null
+          price_docena?: number | null
+          price_mayoreo?: number | null
+          price_media_docena?: number | null
           sold_out?: boolean
           updated_at?: string
         }
@@ -80,6 +121,9 @@ export type Database = {
           image_url?: string | null
           name?: string
           price?: number | null
+          price_docena?: number | null
+          price_mayoreo?: number | null
+          price_media_docena?: number | null
           sold_out?: boolean
           updated_at?: string
         }
