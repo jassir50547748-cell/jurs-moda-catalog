@@ -67,7 +67,6 @@ export default function ProductDetailModal({ product, onClose }: Props) {
     fetchData();
   }, [product.id]);
 
-  // Build gallery: product main image + product_images
   const allImages = (() => {
     const imgs: { url: string; color: string | null }[] = [];
     if (product.image_url) imgs.push({ url: product.image_url, color: null });
@@ -75,7 +74,6 @@ export default function ProductDetailModal({ product, onClose }: Props) {
     return imgs;
   })();
 
-  // When color changes, jump to matching image
   useEffect(() => {
     if (selectedColor && allImages.length > 0) {
       const idx = allImages.findIndex((img) => img.color?.toLowerCase() === selectedColor.toLowerCase());
@@ -104,7 +102,7 @@ export default function ProductDetailModal({ product, onClose }: Props) {
     addItem({
       productId: product.id,
       name: product.name,
-      imageUrl: product.image_url,
+      imageUrl: allImages[currentImageIndex]?.url || product.image_url,
       quantityType: selectedQty,
       color: selectedColor || undefined,
       size: selectedVariant?.size || undefined,
@@ -114,7 +112,6 @@ export default function ProductDetailModal({ product, onClose }: Props) {
     setTimeout(() => setAdded(false), 1200);
   };
 
-  // Touch swipe
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -165,7 +162,6 @@ export default function ProductDetailModal({ product, onClose }: Props) {
             )}
           </AnimatePresence>
 
-          {/* Nav arrows */}
           {allImages.length > 1 && (
             <>
               <button onClick={goPrev} className="absolute left-2 top-1/2 -translate-y-1/2 bg-card/80 backdrop-blur-sm rounded-full p-2 hover:bg-card transition-colors">
@@ -177,7 +173,6 @@ export default function ProductDetailModal({ product, onClose }: Props) {
             </>
           )}
 
-          {/* Dots */}
           {allImages.length > 1 && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
               {allImages.map((_, i) => (
@@ -190,7 +185,6 @@ export default function ProductDetailModal({ product, onClose }: Props) {
             </div>
           )}
 
-          {/* Sold out badge */}
           {isSoldOut && (
             <div className="absolute inset-0 bg-foreground/50 flex items-center justify-center">
               <span className="bg-destructive text-destructive-foreground font-bold text-lg px-6 py-3 rounded-xl rotate-[-12deg] shadow-lg">AGOTADO</span>
@@ -207,29 +201,29 @@ export default function ProductDetailModal({ product, onClose }: Props) {
           <p className="text-xs font-medium text-accent uppercase tracking-wider mb-1">{product.category}</p>
           <h2 className="text-xl font-bold text-foreground mb-3">{product.name}</h2>
 
-          {/* Prices */}
+          {/* Prices in Bs */}
           <div className="flex flex-wrap gap-3 mb-4">
             {product.price_media_docena && (
               <div className="bg-secondary rounded-lg px-3 py-2 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">Media Docena</p>
-                <p className="text-sm font-bold text-foreground">S/ {product.price_media_docena.toFixed(2)}</p>
+                <p className="text-sm font-bold text-foreground">Bs {Number(product.price_media_docena).toFixed(2)}</p>
               </div>
             )}
             {product.price_docena && (
               <div className="bg-secondary rounded-lg px-3 py-2 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">Docena</p>
-                <p className="text-sm font-bold text-foreground">S/ {product.price_docena.toFixed(2)}</p>
+                <p className="text-sm font-bold text-foreground">Bs {Number(product.price_docena).toFixed(2)}</p>
               </div>
             )}
             {product.price_mayoreo && (
               <div className="bg-secondary rounded-lg px-3 py-2 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">Mayor (+12)</p>
-                <p className="text-sm font-bold text-foreground">S/ {product.price_mayoreo.toFixed(2)}</p>
+                <p className="text-sm font-bold text-foreground">Bs {Number(product.price_mayoreo).toFixed(2)}</p>
               </div>
             )}
           </div>
 
-          {/* Color selector */}
+          {/* Color selector with stock bubbles */}
           {uniqueColors.length > 0 && (
             <div className="mb-4">
               <p className="text-xs text-muted-foreground mb-2">Color</p>
@@ -238,13 +232,18 @@ export default function ProductDetailModal({ product, onClose }: Props) {
                   <button
                     key={v.color}
                     onClick={() => setSelectedColor(v.color)}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                    className={`relative text-xs px-3 py-1.5 rounded-full border transition-all ${
                       selectedColor === v.color
                         ? "border-accent bg-accent/10 text-accent font-medium"
                         : "border-border text-muted-foreground hover:border-foreground"
-                    } ${!v.in_stock ? "line-through opacity-50" : ""}`}
+                    } ${!v.in_stock ? "opacity-60" : ""}`}
                   >
                     {v.color}
+                    {!v.in_stock && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
+                        <X className="h-2.5 w-2.5 text-destructive-foreground" />
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -275,6 +274,14 @@ export default function ProductDetailModal({ product, onClose }: Props) {
               ))}
             </div>
           </div>
+
+          {/* Estimated price */}
+          {currentPrice && !disabled && (
+            <div className="mb-4 bg-accent/5 border border-accent/20 rounded-lg px-3 py-2 text-center">
+              <p className="text-xs text-muted-foreground">Precio estimado</p>
+              <p className="text-lg font-bold text-accent">Bs {Number(currentPrice).toFixed(2)}</p>
+            </div>
+          )}
 
           <motion.button
             whileTap={disabled ? {} : { scale: 0.95 }}

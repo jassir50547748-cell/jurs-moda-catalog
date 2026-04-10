@@ -39,7 +39,7 @@ export default function StickyCart() {
             ))}
             <div className="text-sm text-muted-foreground whitespace-nowrap ml-2">
               <span>{totalItems} uds</span>
-              {totalPrice > 0 && <span className="ml-2 font-medium text-foreground">S/ {totalPrice.toFixed(2)}</span>}
+              {totalPrice > 0 && <span className="ml-2 font-medium text-foreground">Bs {totalPrice.toFixed(2)}</span>}
             </div>
           </div>
 

@@ -1,0 +1,10 @@
+---
+name: Pricing in Bolivianos
+description: Wholesale pricing in Bs (Bolivianos). No cuartas. Media Docena and Docena only.
+type: feature
+---
+- Currency: Bolivianos (Bs), NOT soles (S/)
+- Quantity types: media_docena (6 uds), docena (12 uds). NO cuartas.
+- DB columns: price_media_docena, price_docena, price_mayoreo
+- WhatsApp message includes structured per-item breakdown with emojis and total in Bs
+- WhatsApp number: 59175544239

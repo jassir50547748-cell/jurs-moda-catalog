@@ -79,17 +79,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, 0);
 
   const generateWhatsAppUrl = useCallback(() => {
+    const divider = "--------------------------";
     const lines = items.map((item) => {
       const label = quantityLabels[item.quantityType].label;
       const units = quantityLabels[item.quantityType].units * item.quantity;
-      const colorInfo = item.color ? ` | Color: ${item.color}` : "";
-      const sizeInfo = item.size ? ` | Talla: ${item.size}` : "";
-      const priceInfo = item.unitPrice ? ` | S/ ${(item.unitPrice * item.quantity).toFixed(2)}` : "";
-      return `• ${item.quantity}x ${label} de "${item.name}"${colorInfo}${sizeInfo} (${units} uds)${priceInfo}`;
+      const colorInfo = item.color ? `🎨 Color: ${item.color}` : "";
+      const sizeInfo = item.size ? `📏 Talla: ${item.size}` : "";
+      const priceInfo = item.unitPrice ? `💰 Subtotal: Bs ${(item.unitPrice * item.quantity).toFixed(2)}` : "";
+      const imgInfo = item.imageUrl ? `🔗 Foto: ${item.imageUrl}` : "";
+
+      return [
+        `📌 Modelo: ${item.name}`,
+        colorInfo,
+        sizeInfo,
+        `📦 Cantidad: ${item.quantity}x ${label} (${units} uds)`,
+        priceInfo,
+        imgInfo,
+      ].filter(Boolean).join("\n");
     });
 
-    const priceSection = totalPrice > 0 ? `\n\nMonto Total Estimado: S/ ${totalPrice.toFixed(2)}` : "";
-    const message = `Hola Jurs Moda, deseo adquirir los siguientes modelos por mayor (Docenas/Medias):\n\n${lines.join("\n")}\n\nTotal: ${totalItems} unidades${priceSection}\n\nQuedo atento(a) a su confirmación. ¡Gracias!`;
+    const priceSection = totalPrice > 0 ? `\n💰 *Total a pagar: Bs ${totalPrice.toFixed(2)}*` : "";
+    const message = `¡Hola Jurs Moda! Deseo realizar este pedido mayorista:\n\n${divider}\n${lines.join(`\n${divider}\n`)}\n${divider}\n\n📊 Total: ${totalItems} unidades${priceSection}\n\nQuedo atento(a) a su confirmación. ¡Gracias!`;
     const encoded = encodeURIComponent(message);
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
   }, [items, totalItems, totalPrice]);
