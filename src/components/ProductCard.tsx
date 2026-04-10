@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, AlertTriangle, Eye } from "lucide-react";
+import { Plus, Eye, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCart, QuantityType } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,7 +104,6 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             </div>
           )}
 
-          {/* View hint */}
           <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-all duration-300 flex items-center justify-center">
             <motion.div initial={{ opacity: 0 }} whileHover={{ opacity: 1 }} className="opacity-0 group-hover:opacity-100 transition-opacity">
               <Eye className="h-8 w-8 text-primary-foreground drop-shadow-lg" />
@@ -117,24 +116,28 @@ export default function ProductCard({ product, index }: ProductCardProps) {
           <p className="text-xs font-medium text-accent uppercase tracking-wider mb-1">{product.category}</p>
           <h3 className="font-semibold text-foreground text-lg mb-1 truncate">{product.name}</h3>
           {displayPrice !== null && displayPrice !== undefined && (
-            <p className="text-muted-foreground text-sm mb-2">S/ {Number(displayPrice).toFixed(2)}</p>
+            <p className="text-muted-foreground text-sm mb-2">Bs {Number(displayPrice).toFixed(2)}</p>
           )}
 
-          {/* Color pills */}
+          {/* Color pills with stock indicator */}
           {uniqueColors.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3">
               {uniqueColors.map((v) => (
                 <span
                   key={v.color}
-                  className={`text-xs px-2 py-0.5 rounded-full border border-border text-muted-foreground ${!v.in_stock ? "line-through opacity-50" : ""}`}
+                  className={`relative text-xs px-2 py-0.5 rounded-full border border-border text-muted-foreground ${!v.in_stock ? "opacity-50" : ""}`}
                 >
                   {v.color}
+                  {!v.in_stock && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full flex items-center justify-center">
+                      <X className="h-2 w-2 text-destructive-foreground" />
+                    </span>
+                  )}
                 </span>
               ))}
             </div>
           )}
 
-          {/* Quick add */}
           <motion.button
             whileTap={disabled ? {} : { scale: 0.95 }}
             onClick={(e) => {
@@ -160,7 +163,6 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         </div>
       </motion.div>
 
-      {/* Detail Modal */}
       <AnimatePresence>
         {showModal && (
           <ProductDetailModal

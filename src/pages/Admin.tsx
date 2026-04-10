@@ -75,9 +75,9 @@ export default function Admin() {
 
   const formatPrice = (p: Product) => {
     const parts: string[] = [];
-    if (p.price_media_docena) parts.push(`½D: S/${p.price_media_docena}`);
-    if (p.price_docena) parts.push(`D: S/${p.price_docena}`);
-    if (p.price_mayoreo) parts.push(`M: S/${p.price_mayoreo}`);
+    if (p.price_media_docena) parts.push(`½D: Bs${p.price_media_docena}`);
+    if (p.price_docena) parts.push(`D: Bs${p.price_docena}`);
+    if (p.price_mayoreo) parts.push(`M: Bs${p.price_mayoreo}`);
     return parts.length > 0 ? parts.join(" | ") : "—";
   };
 
