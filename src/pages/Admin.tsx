@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Plus, LogOut, Eye, EyeOff, Package, Palette } from "lucide-react";
+import { Trash2, Plus, LogOut, Eye, EyeOff, Package, Palette, ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Database } from "@/integrations/supabase/types";
 import AdminProductForm from "@/components/admin/AdminProductForm";
 import AdminVariantsPanel from "@/components/admin/AdminVariantsPanel";
+import AdminImagesPanel from "@/components/admin/AdminImagesPanel";
 
 type ProductCategory = Database["public"]["Enums"]["product_category"];
 
@@ -16,6 +17,9 @@ interface Product {
   category: ProductCategory;
   image_url: string | null;
   price: number | null;
+  price_media_docena: number | null;
+  price_docena: number | null;
+  price_mayoreo: number | null;
   active: boolean;
   sold_out: boolean;
 }
@@ -28,6 +32,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [variantsProductId, setVariantsProductId] = useState<string | null>(null);
+  const [imagesProductId, setImagesProductId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -68,6 +73,14 @@ export default function Admin() {
     return <div className="min-h-screen flex items-center justify-center bg-background text-foreground">Cargando...</div>;
   }
 
+  const formatPrice = (p: Product) => {
+    const parts: string[] = [];
+    if (p.price_media_docena) parts.push(`½D: S/${p.price_media_docena}`);
+    if (p.price_docena) parts.push(`D: S/${p.price_docena}`);
+    if (p.price_mayoreo) parts.push(`M: S/${p.price_mayoreo}`);
+    return parts.length > 0 ? parts.join(" | ") : "—";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b border-border">
@@ -82,7 +95,7 @@ export default function Admin() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-foreground">{products.length} Modelos</h2>
           <button
@@ -95,15 +108,9 @@ export default function Admin() {
         </div>
 
         <AnimatePresence>
-          {showForm && (
-            <AdminProductForm
-              onClose={() => setShowForm(false)}
-              onSaved={fetchProducts}
-            />
-          )}
+          {showForm && <AdminProductForm onClose={() => setShowForm(false)} onSaved={fetchProducts} />}
         </AnimatePresence>
 
-        {/* Variants Panel */}
         <AnimatePresence>
           {variantsProductId && (
             <AdminVariantsPanel
@@ -114,86 +121,71 @@ export default function Admin() {
           )}
         </AnimatePresence>
 
+        <AnimatePresence>
+          {imagesProductId && (
+            <AdminImagesPanel
+              productId={imagesProductId}
+              productName={products.find((p) => p.id === imagesProductId)?.name || ""}
+              onClose={() => setImagesProductId(null)}
+            />
+          )}
+        </AnimatePresence>
+
         {loading ? (
           <p className="text-muted-foreground">Cargando...</p>
         ) : (
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary">
-                  <tr>
-                    <th className="text-left px-4 py-3 font-medium text-foreground">Foto</th>
-                    <th className="text-left px-4 py-3 font-medium text-foreground">Nombre</th>
-                    <th className="text-left px-4 py-3 font-medium text-foreground">Categoría</th>
-                    <th className="text-left px-4 py-3 font-medium text-foreground">Precio</th>
-                    <th className="text-left px-4 py-3 font-medium text-foreground">Estado</th>
-                    <th className="text-right px-4 py-3 font-medium text-foreground">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {products.map((p) => (
-                    <tr key={p.id} className={`${!p.active ? "opacity-50" : ""}`}>
-                      <td className="px-4 py-3">
-                        {p.image_url ? (
-                          <img src={p.image_url} alt={p.name} className="w-12 h-12 rounded-lg object-cover" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-lg bg-secondary" />
-                        )}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-foreground">{p.name}</td>
-                      <td className="px-4 py-3 capitalize text-muted-foreground">{p.category}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {p.price !== null ? `S/ ${p.price.toFixed(2)}` : "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-col gap-1">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full w-fit ${p.active ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"}`}>
-                            {p.active ? "Activo" : "Oculto"}
-                          </span>
-                          {p.sold_out && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full w-fit bg-red-100 text-red-700">
-                              Agotado
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => setVariantsProductId(p.id)}
-                            className="p-1.5 rounded-md hover:bg-secondary transition-colors text-accent hover:text-accent"
-                            title="Gestionar colores"
-                          >
-                            <Palette className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => toggleSoldOut(p.id, p.sold_out)}
-                            className={`p-1.5 rounded-md hover:bg-secondary transition-colors ${p.sold_out ? "text-destructive" : "text-muted-foreground hover:text-foreground"}`}
-                            title={p.sold_out ? "Marcar disponible" : "Marcar agotado"}
-                          >
-                            <Package className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => toggleActive(p.id, p.active)}
-                            className="p-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-                            title={p.active ? "Ocultar" : "Mostrar"}
-                          >
-                            {p.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                          </button>
-                          <button
-                            onClick={() => deleteProduct(p.id)}
-                            className="p-1.5 rounded-md hover:bg-destructive/10 transition-colors text-destructive"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          /* Mobile-first card layout */
+          <div className="space-y-3">
+            {products.map((p) => (
+              <div
+                key={p.id}
+                className={`bg-card border border-border rounded-xl p-4 flex gap-4 items-start ${!p.active ? "opacity-50" : ""}`}
+              >
+                {/* Thumbnail */}
+                <div className="flex-shrink-0">
+                  {p.image_url ? (
+                    <img src={p.image_url} alt={p.name} className="w-16 h-16 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-lg bg-secondary" />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-foreground truncate">{p.name}</h3>
+                  <p className="text-xs text-muted-foreground capitalize">{p.category}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{formatPrice(p)}</p>
+
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${p.active ? "bg-green-100 text-green-700" : "bg-secondary text-muted-foreground"}`}>
+                      {p.active ? "Activo" : "Oculto"}
+                    </span>
+                    {p.sold_out && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">Agotado</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col gap-1">
+                  <button onClick={() => setImagesProductId(p.id)} className="p-1.5 rounded-md hover:bg-secondary text-accent" title="Fotos">
+                    <ImageIcon className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => setVariantsProductId(p.id)} className="p-1.5 rounded-md hover:bg-secondary text-accent" title="Colores">
+                    <Palette className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => toggleSoldOut(p.id, p.sold_out)} className={`p-1.5 rounded-md hover:bg-secondary ${p.sold_out ? "text-destructive" : "text-muted-foreground"}`} title="Agotado">
+                    <Package className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => toggleActive(p.id, p.active)} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground" title={p.active ? "Ocultar" : "Mostrar"}>
+                    {p.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                  <button onClick={() => deleteProduct(p.id)} className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive" title="Eliminar">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
