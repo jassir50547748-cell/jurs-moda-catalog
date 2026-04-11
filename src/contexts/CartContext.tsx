@@ -83,10 +83,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const lines = items.map((item) => {
       const label = quantityLabels[item.quantityType].label;
       const units = quantityLabels[item.quantityType].units * item.quantity;
-      const colorInfo = item.color ? `🎨 Color: ${item.color}` : "";
+      const colorInfo = item.color ? `🎨 Colores Seleccionados: ${item.color}` : "";
       const sizeInfo = item.size ? `📏 Talla: ${item.size}` : "";
       const priceInfo = item.unitPrice ? `💰 Subtotal: Bs ${(item.unitPrice * item.quantity).toFixed(2)}` : "";
-      const imgInfo = item.imageUrl ? `🔗 Foto: ${item.imageUrl}` : "";
+      const imgInfo = item.imageUrl ? `🔗 Referencia visual: ${item.imageUrl}` : "";
 
       return [
         `📌 Modelo: ${item.name}`,
@@ -98,7 +98,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       ].filter(Boolean).join("\n");
     });
 
-    const priceSection = totalPrice > 0 ? `\n💰 *Total a pagar: Bs ${totalPrice.toFixed(2)}*` : "";
+    const priceSection = totalPrice > 0 ? `\n💰 *TOTAL ESTIMADO: Bs ${totalPrice.toFixed(2)}*` : "";
     const message = `¡Hola Jurs Moda! Deseo realizar este pedido mayorista:\n\n${divider}\n${lines.join(`\n${divider}\n`)}\n${divider}\n\n📊 Total: ${totalItems} unidades${priceSection}\n\nQuedo atento(a) a su confirmación. ¡Gracias!`;
     const encoded = encodeURIComponent(message);
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
