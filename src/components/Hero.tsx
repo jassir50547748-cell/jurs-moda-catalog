@@ -14,7 +14,7 @@ export default function Hero() {
           transition={{ duration: 0.6 }}
           className="text-accent font-medium tracking-widest uppercase text-sm mb-4"
         >
-          Venta al por mayor
+          Especialistas en Confección Mayorista
         </motion.p>
 
         <motion.h1
@@ -30,9 +30,9 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-primary-foreground/70 text-lg md:text-xl max-w-xl mx-auto mb-8"
+          className="text-primary-foreground/70 text-lg md:text-xl max-w-2xl mx-auto mb-8"
         >
-          Busos, shorts, poleras, chompas y más. Pedidos desde cuarta (3 uds), media docena y docena.
+          Busos, shorts, poleras, chompas y más. Envíos a toda Bolivia. Pedidos disponibles exclusivamente desde Media Docena, Docena y Volumen Empresarial.
         </motion.p>
 
         <motion.a

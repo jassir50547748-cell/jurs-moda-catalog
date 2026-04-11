@@ -4,7 +4,6 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import CategoryFilter from "@/components/CategoryFilter";
 import ProductCard from "@/components/ProductCard";
-import StickyCart from "@/components/StickyCart";
 import Footer from "@/components/Footer";
 
 interface Product {
@@ -84,7 +83,6 @@ export default function Index() {
       </main>
 
       <Footer />
-      <StickyCart />
     </div>
   );
 }
