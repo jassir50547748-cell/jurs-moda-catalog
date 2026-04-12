@@ -83,7 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const lines = items.map((item) => {
       const label = quantityLabels[item.quantityType].label;
       const units = quantityLabels[item.quantityType].units * item.quantity;
-      const colorInfo = item.color ? `🎨 Colores Seleccionados: ${item.color}` : "";
+      const colorInfo = item.color ? `🎨 Colores Elegidos: ${item.color}` : "";
       const sizeInfo = item.size ? `📏 Talla: ${item.size}` : "";
       const priceInfo = item.unitPrice ? `💰 Subtotal: Bs ${(item.unitPrice * item.quantity).toFixed(2)}` : "";
       const imgInfo = item.imageUrl ? `🔗 Referencia visual: ${item.imageUrl}` : "";
