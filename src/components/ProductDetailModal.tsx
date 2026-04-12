@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useCart, QuantityType } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,7 +45,8 @@ export default function ProductDetailModal({ product, onClose }: Props) {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [images, setImages] = useState<ProductImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [previewColor, setPreviewColor] = useState("");
   const [selectedQty, setSelectedQty] = useState<QuantityType>("docena");
   const [added, setAdded] = useState(false);
 
@@ -58,7 +59,9 @@ export default function ProductDetailModal({ product, onClose }: Props) {
       if (varRes.data && varRes.data.length > 0) {
         setVariants(varRes.data as Variant[]);
         const firstInStock = varRes.data.find((v: any) => v.in_stock);
-        setSelectedColor(firstInStock ? firstInStock.color : varRes.data[0].color);
+        const initialColor = firstInStock ? firstInStock.color : varRes.data[0].color;
+        setSelectedColors([initialColor]);
+        setPreviewColor(initialColor);
       }
       if (imgRes.data) {
         setImages(imgRes.data as ProductImage[]);
@@ -74,20 +77,35 @@ export default function ProductDetailModal({ product, onClose }: Props) {
     return imgs;
   })();
 
+  // When previewColor changes, jump to matching image
   useEffect(() => {
-    if (selectedColor && allImages.length > 0) {
-      const idx = allImages.findIndex((img) => img.color?.toLowerCase() === selectedColor.toLowerCase());
+    if (previewColor && allImages.length > 0) {
+      const idx = allImages.findIndex((img) => img.color?.toLowerCase() === previewColor.toLowerCase());
       if (idx >= 0) setCurrentImageIndex(idx);
     }
-  }, [selectedColor, allImages.length]);
+  }, [previewColor, allImages.length]);
 
   const uniqueColors = [...new Map(variants.map((v) => [v.color, v])).values()];
-  const selectedVariant = variants.find((v) => v.color === selectedColor);
   const isSoldOut = product.sold_out;
-  const colorSoldOut = selectedVariant ? !selectedVariant.in_stock : false;
-  const disabled = isSoldOut || colorSoldOut;
+
+  // Check if ALL selected colors are sold out
+  const allSelectedSoldOut = selectedColors.length > 0 && selectedColors.every((c) => {
+    const v = variants.find((vr) => vr.color === c);
+    return v ? !v.in_stock : true;
+  });
+  const disabled = isSoldOut || allSelectedSoldOut || selectedColors.length === 0;
 
   const currentPrice = selectedQty === "docena" ? product.price_docena : product.price_media_docena;
+
+  const toggleColor = (color: string) => {
+    setPreviewColor(color); // Always preview the tapped color
+    setSelectedColors((prev) => {
+      if (prev.includes(color)) {
+        return prev.filter((c) => c !== color);
+      }
+      return [...prev, color];
+    });
+  };
 
   const goNext = useCallback(() => {
     setCurrentImageIndex((i) => (i + 1) % Math.max(allImages.length, 1));
@@ -99,12 +117,14 @@ export default function ProductDetailModal({ product, onClose }: Props) {
 
   const handleAdd = () => {
     if (disabled) return;
+    const colorsStr = selectedColors.join(", ");
+    const selectedVariant = variants.find((v) => v.color === selectedColors[0]);
     addItem({
       productId: product.id,
       name: product.name,
       imageUrl: allImages[currentImageIndex]?.url || product.image_url,
       quantityType: selectedQty,
-      color: selectedColor || undefined,
+      color: colorsStr || undefined,
       size: selectedVariant?.size || undefined,
       unitPrice: currentPrice || undefined,
     });
@@ -128,7 +148,7 @@ export default function ProductDetailModal({ product, onClose }: Props) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] bg-foreground/80 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] bg-foreground/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4"
       onClick={onClose}
     >
       <motion.div
@@ -197,61 +217,68 @@ export default function ProductDetailModal({ product, onClose }: Props) {
         </div>
 
         {/* Product Info */}
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           <p className="text-xs font-medium text-accent uppercase tracking-wider mb-1">{product.category}</p>
           <h2 className="text-xl font-bold text-foreground mb-3">{product.name}</h2>
 
-          {/* Prices in Bs */}
-          <div className="flex flex-wrap gap-3 mb-4">
+          {/* Prices */}
+          <div className="flex flex-wrap gap-2 mb-4">
             {product.price_media_docena && (
-              <div className="bg-secondary rounded-lg px-3 py-2 text-center">
+              <div className="bg-secondary rounded-lg px-3 py-2 text-center flex-1 min-w-[90px]">
                 <p className="text-[10px] text-muted-foreground uppercase">Media Docena</p>
                 <p className="text-sm font-bold text-foreground">Bs {Number(product.price_media_docena).toFixed(2)}</p>
               </div>
             )}
             {product.price_docena && (
-              <div className="bg-secondary rounded-lg px-3 py-2 text-center">
+              <div className="bg-secondary rounded-lg px-3 py-2 text-center flex-1 min-w-[90px]">
                 <p className="text-[10px] text-muted-foreground uppercase">Docena</p>
                 <p className="text-sm font-bold text-foreground">Bs {Number(product.price_docena).toFixed(2)}</p>
               </div>
             )}
             {product.price_mayoreo && (
-              <div className="bg-secondary rounded-lg px-3 py-2 text-center">
+              <div className="bg-secondary rounded-lg px-3 py-2 text-center flex-1 min-w-[90px]">
                 <p className="text-[10px] text-muted-foreground uppercase">Mayor (+12)</p>
                 <p className="text-sm font-bold text-foreground">Bs {Number(product.price_mayoreo).toFixed(2)}</p>
               </div>
             )}
           </div>
 
-          {/* Color selector with stock bubbles */}
+          {/* Multi-color selector */}
           {uniqueColors.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs text-muted-foreground mb-2">Color</p>
+              <p className="text-xs text-muted-foreground mb-2">
+                Colores <span className="text-accent">({selectedColors.length} seleccionados)</span>
+              </p>
               <div className="flex flex-wrap gap-2">
-                {uniqueColors.map((v) => (
-                  <button
-                    key={v.color}
-                    onClick={() => setSelectedColor(v.color)}
-                    className={`relative text-xs px-3 py-1.5 rounded-full border transition-all ${
-                      selectedColor === v.color
-                        ? "border-accent bg-accent/10 text-accent font-medium"
-                        : "border-border text-muted-foreground hover:border-foreground"
-                    } ${!v.in_stock ? "opacity-60" : ""}`}
-                  >
-                    {v.color}
-                    {!v.in_stock && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
-                        <X className="h-2.5 w-2.5 text-destructive-foreground" />
-                      </span>
-                    )}
-                  </button>
-                ))}
+                {uniqueColors.map((v) => {
+                  const isSelected = selectedColors.includes(v.color);
+                  return (
+                    <button
+                      key={v.color}
+                      onClick={() => toggleColor(v.color)}
+                      className={`relative text-xs px-3 py-2 rounded-full border transition-all flex items-center gap-1.5 ${
+                        isSelected
+                          ? "border-accent bg-accent/10 text-accent font-medium"
+                          : "border-border text-muted-foreground hover:border-foreground"
+                      } ${!v.in_stock ? "opacity-60" : ""}`}
+                    >
+                      {isSelected && <Check className="h-3 w-3" />}
+                      {v.color}
+                      {!v.in_stock && (
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full flex items-center justify-center">
+                          <X className="h-2.5 w-2.5 text-destructive-foreground" />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
+              <p className="text-[10px] text-muted-foreground mt-1.5">Toca un color para ver su foto y seleccionarlo</p>
             </div>
           )}
 
-          {colorSoldOut && !isSoldOut && (
-            <p className="text-destructive text-xs mb-3">Este color está agotado</p>
+          {allSelectedSoldOut && !isSoldOut && selectedColors.length > 0 && (
+            <p className="text-destructive text-xs mb-3">Los colores seleccionados están agotados</p>
           )}
 
           {/* Quantity */}
@@ -263,7 +290,7 @@ export default function ProductDetailModal({ product, onClose }: Props) {
                   key={opt.value}
                   onClick={() => setSelectedQty(opt.value)}
                   disabled={disabled}
-                  className={`text-sm py-2.5 rounded-lg border transition-all ${
+                  className={`text-sm py-3 rounded-lg border transition-all ${
                     selectedQty === opt.value
                       ? "border-accent bg-accent/10 text-accent font-medium"
                       : "border-border text-muted-foreground hover:border-foreground"
@@ -287,7 +314,7 @@ export default function ProductDetailModal({ product, onClose }: Props) {
             whileTap={disabled ? {} : { scale: 0.95 }}
             onClick={handleAdd}
             disabled={disabled}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all ${
+            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm transition-all ${
               disabled
                 ? "bg-muted text-muted-foreground cursor-not-allowed"
                 : added
@@ -296,11 +323,11 @@ export default function ProductDetailModal({ product, onClose }: Props) {
             }`}
           >
             <ShoppingBag className="h-4 w-4" />
-            {isSoldOut ? "Agotado" : colorSoldOut ? "Color agotado" : added ? "¡Agregado!" : "Añadir al pedido"}
+            {isSoldOut ? "Agotado" : selectedColors.length === 0 ? "Selecciona un color" : added ? "¡Agregado!" : "Añadir al pedido"}
           </motion.button>
 
           <p className="text-[10px] text-muted-foreground text-center mt-2">
-            Pedido mínimo: Media Docena (6 uds)
+            Pedido mínimo: Media Docena (6 uds) · Puedes elegir varios colores
           </p>
         </div>
       </motion.div>

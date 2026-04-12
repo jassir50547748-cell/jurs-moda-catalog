@@ -32,7 +32,6 @@ export default function AdminImagesPanel({ productId, productName, onClose }: Pr
       .order("sort_order");
     const imgs = (data as ProductImage[]) || [];
     setImages(imgs);
-    // Initialize editing state
     const colors: Record<string, string> = {};
     imgs.forEach((img) => { colors[img.id] = img.color || ""; });
     setEditingColors(colors);
@@ -88,20 +87,20 @@ export default function AdminImagesPanel({ productId, productName, onClose }: Pr
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
-      className="bg-card border border-border rounded-2xl p-5 md:p-6 mb-8 overflow-hidden shadow-lg"
+      className="bg-card border border-border rounded-2xl p-4 sm:p-6 mb-6 overflow-hidden shadow-lg"
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-heading text-lg font-bold text-foreground">
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <h3 className="font-heading text-base sm:text-lg font-bold text-foreground truncate">
           📸 Fotos — <span className="text-accent">{productName}</span>
         </h3>
-        <button onClick={onClose} className="p-2 hover:bg-secondary rounded-xl transition-colors">
+        <button onClick={onClose} className="p-2 hover:bg-secondary rounded-xl transition-colors flex-shrink-0">
           <X className="h-5 w-5 text-muted-foreground" />
         </button>
       </div>
 
-      {/* Upload row */}
-      <div className="flex flex-wrap gap-3 mb-6 items-end bg-secondary/50 rounded-xl p-4">
-        <div className="flex-1 min-w-[140px]">
+      {/* Upload row — stacked on mobile */}
+      <div className="space-y-3 mb-6 bg-secondary/50 rounded-xl p-3 sm:p-4">
+        <div>
           <label className="text-xs font-medium text-foreground mb-1.5 block">Color de las fotos nuevas</label>
           <input
             value={uploadColor}
@@ -110,7 +109,7 @@ export default function AdminImagesPanel({ productId, productName, onClose }: Pr
             className="w-full bg-card text-foreground rounded-xl px-4 py-3 text-sm border border-border outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
           />
         </div>
-        <label className="flex items-center gap-2 bg-accent text-accent-foreground px-5 py-3 rounded-xl text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity">
+        <label className="flex items-center justify-center gap-2 bg-accent text-accent-foreground w-full px-5 py-3 rounded-xl text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity active:opacity-80">
           <Upload className="h-4 w-4" />
           {uploading ? "Subiendo..." : "Subir fotos"}
           <input type="file" accept="image/*" multiple onChange={handleUpload} className="hidden" disabled={uploading} />
@@ -126,38 +125,40 @@ export default function AdminImagesPanel({ productId, productName, onClose }: Pr
         <>
           <div className="space-y-3">
             {images.map((img) => (
-              <div key={img.id} className="flex items-center gap-3 bg-secondary/50 rounded-xl p-3">
-                <div className="w-16 h-16 rounded-lg overflow-hidden border border-border flex-shrink-0">
-                  <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+              <div key={img.id} className="bg-secondary/50 rounded-xl p-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-border flex-shrink-0">
+                    <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <label className="text-[10px] text-muted-foreground mb-1 block flex items-center gap-1">
+                      <Pencil className="h-2.5 w-2.5" /> Color asignado
+                    </label>
+                    <input
+                      value={editingColors[img.id] || ""}
+                      onChange={(e) => setEditingColors((prev) => ({ ...prev, [img.id]: e.target.value }))}
+                      placeholder="Sin color asignado"
+                      className="w-full bg-card text-foreground rounded-lg px-3 py-2.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+                    />
+                  </div>
+                  <button
+                    onClick={() => deleteImage(img.id)}
+                    className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors flex-shrink-0 mt-3"
+                    title="Eliminar foto"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <label className="text-[10px] text-muted-foreground mb-1 block flex items-center gap-1">
-                    <Pencil className="h-2.5 w-2.5" /> Color asignado
-                  </label>
-                  <input
-                    value={editingColors[img.id] || ""}
-                    onChange={(e) => setEditingColors((prev) => ({ ...prev, [img.id]: e.target.value }))}
-                    placeholder="Sin color asignado"
-                    className="w-full bg-card text-foreground rounded-lg px-3 py-1.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-                  />
-                </div>
-                <button
-                  onClick={() => deleteImage(img.id)}
-                  className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors flex-shrink-0"
-                  title="Eliminar foto"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
               </div>
             ))}
           </div>
 
-          {/* Save Changes button */}
-          <div className="mt-4 flex justify-end">
+          {/* Save Changes button — always visible */}
+          <div className="mt-4 sticky bottom-0 bg-card pt-2 pb-1">
             <button
               onClick={saveAllColors}
               disabled={savingColors || !hasChanges}
-              className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3.5 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 active:bg-primary/80"
             >
               <Save className="h-4 w-4" />
               {savingColors ? "Guardando..." : "Guardar Cambios"}

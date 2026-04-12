@@ -95,11 +95,11 @@ export default function AdminProductForm({ onClose, onSaved }: AdminProductFormP
       animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
       onSubmit={handleSubmit}
-      className="bg-card border border-border rounded-2xl p-5 md:p-6 mb-8 overflow-hidden shadow-lg"
+      className="bg-card border border-border rounded-2xl p-4 sm:p-6 mb-6 overflow-hidden shadow-lg"
     >
-      <h3 className="font-heading text-lg font-bold text-foreground mb-4">Nuevo Modelo</h3>
+      <h3 className="font-heading text-base sm:text-lg font-bold text-foreground mb-4">Nuevo Modelo</h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">Nombre del modelo *</label>
           <input
@@ -122,78 +122,87 @@ export default function AdminProductForm({ onClose, onSaved }: AdminProductFormP
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">Precio Media Docena (6 uds)</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Bs</span>
-            <input
-              type="number"
-              step="0.01"
-              value={priceMediaDocena}
-              onChange={(e) => setPriceMediaDocena(e.target.value)}
-              className="w-full bg-secondary text-foreground rounded-xl pl-10 pr-4 py-3 border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
-            />
+        {/* Prices — stacked on mobile */}
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-foreground">Precios (Bs)</p>
+          <div>
+            <label className="text-[10px] text-muted-foreground mb-1 block">Media Docena (6 uds)</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Bs</span>
+              <input
+                type="number"
+                step="0.01"
+                value={priceMediaDocena}
+                onChange={(e) => setPriceMediaDocena(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-secondary text-foreground rounded-xl pl-10 pr-4 py-3 border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
+              />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">Precio Docena (12 uds)</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Bs</span>
-            <input
-              type="number"
-              step="0.01"
-              value={priceDocena}
-              onChange={(e) => setPriceDocena(e.target.value)}
-              className="w-full bg-secondary text-foreground rounded-xl pl-10 pr-4 py-3 border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
-            />
+          <div>
+            <label className="text-[10px] text-muted-foreground mb-1 block">Docena (12 uds)</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Bs</span>
+              <input
+                type="number"
+                step="0.01"
+                value={priceDocena}
+                onChange={(e) => setPriceDocena(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-secondary text-foreground rounded-xl pl-10 pr-4 py-3 border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
+              />
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">Precio Mayor Externo (+12)</label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Bs</span>
-            <input
-              type="number"
-              step="0.01"
-              value={priceMayoreo}
-              onChange={(e) => setPriceMayoreo(e.target.value)}
-              className="w-full bg-secondary text-foreground rounded-xl pl-10 pr-4 py-3 border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
-            />
+          <div>
+            <label className="text-[10px] text-muted-foreground mb-1 block">Mayor Externo (+12)</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Bs</span>
+              <input
+                type="number"
+                step="0.01"
+                value={priceMayoreo}
+                onChange={(e) => setPriceMayoreo(e.target.value)}
+                placeholder="0.00"
+                className="w-full bg-secondary text-foreground rounded-xl pl-10 pr-4 py-3 border border-border outline-none focus:ring-2 focus:ring-ring text-sm"
+              />
+            </div>
           </div>
         </div>
 
         {/* Photo upload with per-photo color assignment */}
-        <div className="md:col-span-2">
+        <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">Fotos del modelo *</label>
           <p className="text-xs text-muted-foreground mb-3">Asigna un color a cada foto para vincularla automáticamente</p>
 
           <div className="space-y-3 mb-3">
             {imageFiles.map((entry, i) => (
-              <div key={i} className="flex items-center gap-3 bg-secondary/50 rounded-xl p-2">
-                <div className="w-16 h-16 rounded-lg overflow-hidden border border-border bg-secondary flex-shrink-0">
-                  <img src={URL.createObjectURL(entry.file)} alt="" className="w-full h-full object-cover" />
+              <div key={i} className="bg-secondary/50 rounded-xl p-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-16 h-16 rounded-lg overflow-hidden border border-border bg-secondary flex-shrink-0">
+                    <img src={URL.createObjectURL(entry.file)} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-muted-foreground truncate mb-1">{entry.file.name}</p>
+                    <input
+                      value={entry.color}
+                      onChange={(e) => updateFileColor(i, e.target.value)}
+                      placeholder="Color (ej: Negro, Blanco...)"
+                      className="w-full bg-card text-foreground rounded-lg px-3 py-2.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors flex-shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground truncate mb-1">{entry.file.name}</p>
-                  <input
-                    value={entry.color}
-                    onChange={(e) => updateFileColor(i, e.target.value)}
-                    placeholder="Color (ej: Negro, Blanco...)"
-                    className="w-full bg-card text-foreground rounded-lg px-3 py-1.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
               </div>
             ))}
           </div>
 
-          <label className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-5 py-3 rounded-xl text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity">
+          <label className="flex items-center justify-center gap-2 bg-accent text-accent-foreground w-full px-5 py-3 rounded-xl text-sm font-medium cursor-pointer hover:opacity-90 transition-opacity active:opacity-80">
             <Upload className="h-4 w-4" />
             Subir Fotos
             <input
@@ -208,18 +217,18 @@ export default function AdminProductForm({ onClose, onSaved }: AdminProductFormP
         </div>
       </div>
 
-      <div className="flex gap-3 mt-6">
+      <div className="flex flex-col sm:flex-row gap-3 mt-6">
         <button
           type="submit"
           disabled={saving || imageFiles.length === 0}
-          className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="w-full sm:w-auto bg-primary text-primary-foreground px-8 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 active:bg-primary/80"
         >
           {saving ? "Guardando..." : "Guardar Modelo"}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="px-6 py-3 rounded-xl text-sm border border-border text-muted-foreground hover:bg-secondary transition-colors"
+          className="w-full sm:w-auto px-6 py-3.5 rounded-xl text-sm border border-border text-muted-foreground hover:bg-secondary transition-colors"
         >
           Cancelar
         </button>
