@@ -113,30 +113,31 @@ export default function Admin() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border sticky top-0 z-30">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="font-heading text-xl font-bold text-foreground">🛠️ Panel Admin</h1>
-          <div className="flex items-center gap-3">
-            <a href="/" className="text-sm text-accent hover:text-accent/80 transition-colors font-medium">Ver Tienda</a>
-            <button onClick={signOut} className="flex items-center gap-1.5 text-sm text-destructive hover:opacity-80 transition-opacity font-medium">
-              <LogOut className="h-4 w-4" /> Salir
+        <div className="px-4 h-14 flex items-center justify-between max-w-3xl mx-auto">
+          <h1 className="font-heading text-lg font-bold text-foreground">🛠️ Admin</h1>
+          <div className="flex items-center gap-2">
+            <a href="/" className="text-xs text-accent hover:text-accent/80 transition-colors font-medium px-2 py-1.5">Tienda</a>
+            <button onClick={signOut} className="flex items-center gap-1 text-xs text-destructive hover:opacity-80 transition-opacity font-medium px-2 py-1.5">
+              <LogOut className="h-3.5 w-3.5" /> Salir
             </button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 max-w-3xl">
+      <div className="px-3 sm:px-4 py-4 max-w-3xl mx-auto">
         {/* Add product */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-bold text-foreground">{products.length} Modelos</h2>
-            <p className="text-xs text-muted-foreground">Gestión de catálogo mayorista</p>
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div className="min-w-0">
+            <h2 className="text-base font-bold text-foreground">{products.length} Modelos</h2>
+            <p className="text-[10px] text-muted-foreground">Gestión de catálogo mayorista</p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 bg-accent text-accent-foreground px-5 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity shadow-md"
+            className="flex items-center gap-1.5 bg-accent text-accent-foreground px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity shadow-md flex-shrink-0"
           >
             <Plus className="h-4 w-4" />
-            Nuevo Modelo
+            <span className="hidden sm:inline">Nuevo Modelo</span>
+            <span className="sm:hidden">Nuevo</span>
           </button>
         </div>
 
@@ -168,20 +169,19 @@ export default function Admin() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-card rounded-2xl border border-border p-5 animate-pulse">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 rounded-xl bg-secondary" />
+              <div key={i} className="bg-card rounded-2xl border border-border p-4 animate-pulse">
+                <div className="flex gap-3">
+                  <div className="w-16 h-16 rounded-xl bg-secondary" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-secondary rounded w-3/4" />
                     <div className="h-3 bg-secondary rounded w-1/2" />
-                    <div className="h-3 bg-secondary rounded w-2/3" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {products.map((p) => (
               <motion.div
                 key={p.id}
@@ -191,13 +191,13 @@ export default function Admin() {
                 className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm transition-opacity ${!p.active ? "opacity-50" : ""}`}
               >
                 {/* Main card content */}
-                <div className="p-4 flex gap-4">
+                <div className="p-3 sm:p-4 flex gap-3">
                   {/* Thumbnail */}
                   <div className="flex-shrink-0">
                     {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} className="w-20 h-20 rounded-xl object-cover border border-border" />
+                      <img src={p.image_url} alt={p.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-border" />
                     ) : (
-                      <div className="w-20 h-20 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground text-xs">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground text-xs">
                         Sin foto
                       </div>
                     )}
@@ -206,70 +206,73 @@ export default function Admin() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="font-bold text-foreground text-base truncate">{p.name}</h3>
-                        <span className="text-xs text-accent font-medium">{categoryLabels[p.category] || p.category}</span>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-foreground text-sm sm:text-base truncate">{p.name}</h3>
+                        <span className="text-[10px] sm:text-xs text-accent font-medium">{categoryLabels[p.category] || p.category}</span>
                       </div>
-                      <div className="flex gap-1 flex-shrink-0">
+                      <div className="flex gap-1 flex-shrink-0 flex-wrap justify-end">
                         {p.active ? (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">Activo</span>
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-green-100 text-green-700">Activo</span>
                         ) : (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">Oculto</span>
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">Oculto</span>
                         )}
                         {p.sold_out && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Agotado</span>
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-700">Agotado</span>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-xs text-muted-foreground mt-1">{formatPrice(p)}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 truncate">{formatPrice(p)}</p>
 
                     {/* Inline price editor */}
                     {editingPrices === p.id && (
                       <div className="mt-3 bg-secondary/50 rounded-xl p-3 space-y-2">
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-2">
                           <div>
-                            <label className="text-[10px] text-muted-foreground">½ Docena</label>
+                            <label className="text-[10px] text-muted-foreground">½ Docena (Bs)</label>
                             <input
                               type="number"
                               step="0.01"
                               value={priceForm.media}
                               onChange={(e) => setPriceForm((f) => ({ ...f, media: e.target.value }))}
-                              className="w-full bg-card text-foreground rounded-lg px-2 py-1.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring"
+                              className="w-full bg-card text-foreground rounded-lg px-3 py-2.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring"
+                              placeholder="0.00"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] text-muted-foreground">Docena</label>
+                            <label className="text-[10px] text-muted-foreground">Docena (Bs)</label>
                             <input
                               type="number"
                               step="0.01"
                               value={priceForm.docena}
                               onChange={(e) => setPriceForm((f) => ({ ...f, docena: e.target.value }))}
-                              className="w-full bg-card text-foreground rounded-lg px-2 py-1.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring"
+                              className="w-full bg-card text-foreground rounded-lg px-3 py-2.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring"
+                              placeholder="0.00"
                             />
                           </div>
                           <div>
-                            <label className="text-[10px] text-muted-foreground">Mayor</label>
+                            <label className="text-[10px] text-muted-foreground">Mayor (+12) (Bs)</label>
                             <input
                               type="number"
                               step="0.01"
                               value={priceForm.mayoreo}
                               onChange={(e) => setPriceForm((f) => ({ ...f, mayoreo: e.target.value }))}
-                              className="w-full bg-card text-foreground rounded-lg px-2 py-1.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring"
+                              className="w-full bg-card text-foreground rounded-lg px-3 py-2.5 text-sm border border-border outline-none focus:ring-2 focus:ring-ring"
+                              placeholder="0.00"
                             />
                           </div>
                         </div>
                         <div className="flex gap-2 justify-end">
                           <button
                             onClick={() => setEditingPrices(null)}
-                            className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg transition-colors"
+                            className="text-xs text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg transition-colors"
                           >
                             Cancelar
                           </button>
                           <button
                             onClick={() => savePrice(p.id)}
                             disabled={savingPrice}
-                            className="flex items-center gap-1 text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50"
+                            className="flex items-center gap-1 text-xs bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50"
                           >
                             <Save className="h-3 w-3" /> Guardar
                           </button>
@@ -279,41 +282,41 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Action bar */}
-                <div className="border-t border-border px-4 py-2.5 flex items-center justify-between bg-secondary/30">
-                  <div className="flex gap-1">
-                    <button onClick={() => setImagesProductId(p.id)} className="flex items-center gap-1.5 text-xs text-foreground bg-secondary hover:bg-muted px-3 py-2 rounded-xl transition-colors font-medium">
-                      <ImageIcon className="h-3.5 w-3.5" /> Fotos
-                    </button>
-                    <button onClick={() => setVariantsProductId(p.id)} className="flex items-center gap-1.5 text-xs text-foreground bg-secondary hover:bg-muted px-3 py-2 rounded-xl transition-colors font-medium">
-                      <Palette className="h-3.5 w-3.5" /> Colores
-                    </button>
-                    <button onClick={() => startEditPrice(p)} className="flex items-center gap-1.5 text-xs text-foreground bg-secondary hover:bg-muted px-3 py-2 rounded-xl transition-colors font-medium">
-                      <DollarSign className="h-3.5 w-3.5" /> Precios
-                    </button>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => toggleSoldOut(p.id, p.sold_out)}
-                      className={`p-2 rounded-xl transition-colors ${p.sold_out ? "bg-red-100 text-red-700" : "hover:bg-secondary text-muted-foreground"}`}
-                      title={p.sold_out ? "Marcar disponible" : "Marcar agotado"}
-                    >
-                      <Package className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => toggleActive(p.id, p.active)}
-                      className="p-2 rounded-xl hover:bg-secondary text-muted-foreground transition-colors"
-                      title={p.active ? "Ocultar" : "Mostrar"}
-                    >
-                      {p.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(p.id)}
-                      className="p-2 rounded-xl hover:bg-destructive/10 text-destructive transition-colors"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                {/* Action bar — mobile-friendly grid */}
+                <div className="border-t border-border px-3 py-2 bg-secondary/30">
+                  <div className="flex items-center justify-between gap-1">
+                    <div className="flex gap-1 overflow-x-auto">
+                      <button onClick={() => setImagesProductId(p.id)} className="flex items-center gap-1 text-[11px] text-foreground bg-secondary hover:bg-muted px-2.5 py-2 rounded-lg transition-colors font-medium flex-shrink-0 active:bg-muted">
+                        <ImageIcon className="h-3.5 w-3.5" /> Fotos
+                      </button>
+                      <button onClick={() => setVariantsProductId(p.id)} className="flex items-center gap-1 text-[11px] text-foreground bg-secondary hover:bg-muted px-2.5 py-2 rounded-lg transition-colors font-medium flex-shrink-0 active:bg-muted">
+                        <Palette className="h-3.5 w-3.5" /> Colores
+                      </button>
+                      <button onClick={() => startEditPrice(p)} className="flex items-center gap-1 text-[11px] text-foreground bg-secondary hover:bg-muted px-2.5 py-2 rounded-lg transition-colors font-medium flex-shrink-0 active:bg-muted">
+                        <DollarSign className="h-3.5 w-3.5" /> Bs
+                      </button>
+                    </div>
+                    <div className="flex gap-0.5 flex-shrink-0">
+                      <button
+                        onClick={() => toggleSoldOut(p.id, p.sold_out)}
+                        className={`p-2 rounded-lg transition-colors ${p.sold_out ? "bg-red-100 text-red-700" : "hover:bg-secondary text-muted-foreground"}`}
+                        title={p.sold_out ? "Marcar disponible" : "Marcar agotado"}
+                      >
+                        <Package className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => toggleActive(p.id, p.active)}
+                        className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+                      >
+                        {p.active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                      <button
+                        onClick={() => deleteProduct(p.id)}
+                        className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
